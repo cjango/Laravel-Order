@@ -71,6 +71,7 @@ class Order extends Model
 
         self::creating(function ($model) {
             $model->orderid = Helper::orderid(config('order.orderid.length'), config('order.orderid.prefix'));
+            $model->state   = self::ORDER_INIT;
         });
 
         self::updated(function ($model) {

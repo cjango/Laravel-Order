@@ -8,6 +8,7 @@ use AsLong\Order\Exceptions\OrderException;
 use AsLong\Order\Models\Order as OrderModel;
 use Exception;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class Order
@@ -17,7 +18,7 @@ class Order
 
     protected $total;
 
-    protected $addressbook;
+    protected $address;
 
     protected $items;
 
@@ -55,33 +56,16 @@ class Order
             throw new CartException('无法创建无内容的订单');
         }
 
-        $this->items = $items;
+        $this->items   = new Collection($items);
+        $this->address = $address;
 
-        $this->addressbook = $address;
+        $splits = $this->splitOrderBySeller($items);
 
         DB::beginTransaction();
 
         try {
-            $order = OrderModel::create([
-                'user_id' => $this->user,
-                'amount'  => 123,
-                'freight' => 0,
-                'remark'  => $remark,
-            ]);
-
-            foreach ($items as $item) {
-                $order->items()->create($item->toArray());
-            }
-
-            if ($address instanceof Addressbook) {
-                $order->express()->create([
-                    'name'        => $address->getName(),
-                    'mobile'      => $address->getMobile(),
-                    'province_id' => $address->getProvinceId(),
-                    'city_id'     => $address->getCityId(),
-                    'district_id' => $address->getDistrictId(),
-                    'address'     => $address->getAddress(),
-                ]);
+            foreach ($splits as $split) {
+                $this->createOne($split, $remark);
             }
 
             DB::commit();
@@ -90,6 +74,46 @@ class Order
         } catch (Exception $exception) {
             DB::rollBack();
             throw new OrderException($exception->getMessage());
+        }
+    }
+
+    /**
+     * Notes: 按照商户，对订单进行分组
+     * @Author: <C.Jason>
+     * @Date: 2019/11/21 6:00 下午
+     * @return mixed
+     */
+    protected function splitOrderBySeller()
+    {
+        return $this->items->groupBy('seller_id')->map(function ($items, $key) {
+            $items->amount = $items->reduce(function ($total, $item) {
+                return $total + $item->total();
+            });;
+            $items->qty = $items->reduce(function ($qty, $item) {
+                return $qty + $item->qty;
+            });;
+            $items->seller_id = $key;
+
+            return $items;
+        });
+    }
+
+    protected function createOne($split, $remark = null)
+    {
+        $order = OrderModel::create([
+            'seller_id' => $split->seller_id,
+            'user_id'   => $this->user,
+            'amount'    => $split->amount,
+            'freight'   => 0,
+            'remark'    => $remark,
+        ]);
+
+        foreach ($split as $item) {
+            $order->items()->create($item->toArray());
+        }
+
+        if ($this->address instanceof Addressbook) {
+            $this->setOrderAddress($order, $this->address);
         }
     }
 
@@ -111,11 +135,29 @@ class Order
 
     public function address()
     {
-        if ($this->addressbook instanceof Addressbook) {
-            return $this->addressbook->getFullAddress();
+        if ($this->address instanceof Addressbook) {
+            return $this->address->getFullAddress();
         } else {
             return null;
         }
+    }
+
+    /**
+     * Notes: 设置订单收货地址
+     * @Author: <C.Jason>
+     * @Date: 2019/11/21 4:29 下午
+     * @param $order
+     */
+    protected function setOrderAddress($order, $address)
+    {
+        $order->express()->create([
+            'name'        => $address->getName(),
+            'mobile'      => $address->getMobile(),
+            'province_id' => $address->getProvinceId(),
+            'city_id'     => $address->getCityId(),
+            'district_id' => $address->getDistrictId(),
+            'address'     => $address->getAddress(),
+        ]);
     }
 
     public function __get($attr)

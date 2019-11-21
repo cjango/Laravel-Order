@@ -9,13 +9,15 @@ use Illuminate\Contracts\Support\Jsonable;
 class Item implements Arrayable, Jsonable
 {
 
-    protected $qty;
+    public $qty;
 
-    protected $item_type;
+    public $item_type;
 
-    protected $item_id;
+    public $item_id;
 
-    protected $price;
+    public $price;
+
+    public $seller_id;
 
     /**
      * Item constructor.
@@ -26,6 +28,7 @@ class Item implements Arrayable, Jsonable
     {
         $this->item_type = get_class($item);
         $this->item_id   = $item->getCartableIdentifier();
+        $this->seller_id = $item->getSellerIdentifier();
         $this->qty       = $qty;
         $this->price     = $item->getCartablePrice();
     }
