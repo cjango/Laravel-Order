@@ -14,7 +14,7 @@ class CreateOrderItemsTable extends Migration
      */
     public function up()
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('order_items', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('order_id')->index('order_id');
             $table->string('item_type')->comment('商品类型');
