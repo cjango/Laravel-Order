@@ -19,6 +19,9 @@ class CreateOrderExpressesTable extends Migration
             $table->unsignedBigInteger('order_id')->index('order_id');
             $table->string('name', 32)->nullable();
             $table->string('mobile', 32)->nullable();
+            $table->unsignedInteger('province_id')->nullable();
+            $table->unsignedInteger('city_id')->nullable();
+            $table->unsignedInteger('district_id')->nullable();
             $table->string('address')->nullable();
             $table->string('company', 32)->nullable()->comment('物流公司');
             $table->string('number', 32)->nullable()->comment('物流单号');

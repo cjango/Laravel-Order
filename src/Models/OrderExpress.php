@@ -2,13 +2,18 @@
 
 namespace AsLong\Order\Models;
 
+use AsLong\Address\Traits\HasArea;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderExpress extends Model
 {
+
+    use HasArea;
+
     protected $guarded = [];
 
-    protected $dates = [
+    protected $dates   = [
         'deliver_at',
         'receive_at',
     ];
@@ -19,21 +24,9 @@ class OrderExpress extends Model
      * @Date:2018-10-19T13:49:06+0800
      * @return Order
      */
-    public function order()
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * 设置收货地址详细内容
-     * @Author:<C.Jason>
-     * @Date:2018-10-22T10:10:02+0800
-     * @param Addressbook $Addressbook
-     */
-    public function setInstanceAttribute($Addressbook)
-    {
-        $this->attributes['name']    = $Addressbook->getName();
-        $this->attributes['mobile']  = $Addressbook->getMobile();
-        $this->attributes['address'] = $Addressbook->getAddress();
-    }
 }

@@ -19,7 +19,7 @@ class OrderLog extends Model
      * @Date: 2019/11/20 1:50 下午
      * @return BelongsTo
      */
-    public function order()
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
@@ -30,7 +30,7 @@ class OrderLog extends Model
      * @Date: 2019/11/20 1:50 下午
      * @return MorphTo
      */
-    public function user()
+    public function user(): MorphTo
     {
         return $this->morphTo();
     }

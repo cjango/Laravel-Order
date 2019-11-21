@@ -5,7 +5,10 @@ namespace AsLong\Order\Models;
 use AsLong\Order\Traits\RefundCando;
 use AsLong\Order\Traits\RefundHasActions;
 use AsLong\Order\Utils\Helper;
+use Encore\Admin\Form\Field\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Refund extends Model
@@ -42,7 +45,7 @@ class Refund extends Model
      * @Date:2018-10-19T13:45:04+0800
      * @return Order
      */
-    public function order()
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
@@ -53,7 +56,7 @@ class Refund extends Model
      * @Date:2018-10-19T13:45:26+0800
      * @return OrderRefundItem
      */
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(RefundItem::class);
     }
@@ -64,7 +67,7 @@ class Refund extends Model
      * @Date:2018-10-19T10:36:03+0800
      * @return RefundExpress
      */
-    public function express()
+    public function express(): HasOne
     {
         return $this->hasOne(RefundExpress::class);
     }

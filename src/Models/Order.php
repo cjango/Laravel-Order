@@ -6,6 +6,7 @@ use AsLong\Order\Traits\OrderCando;
 use AsLong\Order\Traits\OrderHasActions;
 use AsLong\Order\Traits\OrderHasAttributes;
 use AsLong\Order\Traits\OrderHasScopes;
+use AsLong\Order\Utils\Helper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -86,7 +87,7 @@ class Order extends Model
      * @Date: 2019/11/20 1:51 下午
      * @return BelongsTo
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(config('order.user_model'))->withDefault();
     }
@@ -97,7 +98,7 @@ class Order extends Model
      * @Date: 2019/11/20 1:51 下午
      * @return BelongsTo
      */
-    public function seller()
+    public function seller(): BelongsTo
     {
         return $this->belongsTo(config('order.seller_model'))->withDefault();
     }
@@ -108,7 +109,7 @@ class Order extends Model
      * @Date: 2019/11/20 1:52 下午
      * @return HasMany
      */
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
@@ -119,7 +120,7 @@ class Order extends Model
      * @Date: 2019/11/20 1:52 下午
      * @return HasOne
      */
-    public function express()
+    public function express(): HasOne
     {
         return $this->hasOne(OrderExpress::class);
     }
@@ -130,7 +131,7 @@ class Order extends Model
      * @Date: 2019/11/20 1:53 下午
      * @return HasMany
      */
-    public function logs()
+    public function logs(): HasMany
     {
         return $this->hasMany(OrderLog::class);
     }
@@ -141,7 +142,7 @@ class Order extends Model
      * @Date: 2019/11/20 1:54 下午
      * @return HasMany
      */
-    public function refunds()
+    public function refunds(): HasMany
     {
         return $this->hasMany(Refund::class);
     }
