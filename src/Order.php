@@ -14,13 +14,30 @@ use Illuminate\Support\Facades\DB;
 class Order
 {
 
+    /**
+     * @var int
+     */
     protected $user;
 
+    /**
+     * @var float
+     */
     protected $total;
 
+    /**
+     * @var Addressbook
+     */
     protected $address;
 
+    /**
+     * @var array
+     */
     protected $items;
+
+    /**
+     * @var string
+     */
+    protected $remark;
 
     /**
      * Notes: 设置当前用户
@@ -43,6 +60,34 @@ class Order
     }
 
     /**
+     * Notes: 设置订单备注信息
+     * @Author: <C.Jason>
+     * @Date: 2019/11/22 10:38 上午
+     * @param string $remark
+     * @return $this
+     */
+    public function remark(string $remark)
+    {
+        $this->remark = $remark;
+
+        return $this;
+    }
+
+    /**
+     * Notes: 设置订单收货地址
+     * @Author: <C.Jason>
+     * @Date: 2019/11/22 10:40 上午
+     * @param Addressbook $address
+     * @return $this
+     */
+    public function address(Addressbook $address)
+    {
+        $this->address = $address;
+
+        return $this;
+    }
+
+    /**
      * Notes: 创建订单
      * @Author: <C.Jason>
      * @Date: 2019/11/21 10:42 上午
@@ -50,14 +95,17 @@ class Order
      * @param Addressbook|null $address
      * @param string|null $remark
      */
-    public function create(array $items, Addressbook $address = null, string $remark = null)
+    public function create(array $items)
     {
         if (empty($items)) {
             throw new CartException('无法创建无内容的订单');
         }
 
-        $this->items   = new Collection($items);
-        $this->address = $address;
+        if (!is_numeric($this->user)) {
+            throw new CartException('必须先设置订单用户');
+        }
+
+        $this->items = new Collection($items);
 
         $splits = $this->splitOrderBySeller($items);
 
@@ -65,12 +113,15 @@ class Order
 
         try {
             foreach ($splits as $split) {
-                $this->createOne($split, $remark);
+                $orders[] = $this->createOne($split);
             }
 
             DB::commit();
+            $result = new Collection($orders);
 
-            return $this;
+            $result->total = $this->total();
+
+            return $result;
         } catch (Exception $exception) {
             DB::rollBack();
             throw new OrderException($exception->getMessage());
@@ -98,6 +149,13 @@ class Order
         });
     }
 
+    /**
+     * Notes: 创建一条订单记录
+     * @Author: <C.Jason>
+     * @Date: 2019/11/22 10:23 上午
+     * @param $split
+     * @param null $remark
+     */
     protected function createOne($split, $remark = null)
     {
         $order = OrderModel::create([
@@ -105,7 +163,7 @@ class Order
             'user_id'   => $this->user,
             'amount'    => $split->amount,
             'freight'   => 0,
-            'remark'    => $remark,
+            'remark'    => $this->remark,
         ]);
 
         foreach ($split as $item) {
@@ -115,10 +173,12 @@ class Order
         if ($this->address instanceof Addressbook) {
             $this->setOrderAddress($order, $this->address);
         }
+
+        return $order;
     }
 
     /**
-     * Notes: 计算当前总价格
+     * Notes: 计算订单总价格
      * @Author: <C.Jason>
      * @Date: 2019/11/21 11:17 上午
      * @return int|string
@@ -131,15 +191,6 @@ class Order
         }
 
         return $this->total;
-    }
-
-    public function address()
-    {
-        if ($this->address instanceof Addressbook) {
-            return $this->address->getFullAddress();
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -166,20 +217,18 @@ class Order
             case 'total':
                 return $this->total();
                 break;
-            case 'address':
-                return $this->address();
-                break;
         }
 
         return null;
     }
 
-    public function fromCart($userId)
-    {
-
-    }
-
-    public function refund()
+    /**
+     * Notes: 从购物车创建订单
+     * @Author: <C.Jason>
+     * @Date: 2019/11/22 10:23 上午
+     * @param $userId
+     */
+    public function fromCart($rowIds)
     {
 
     }
