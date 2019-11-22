@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Order extends Model
 {
@@ -76,6 +77,7 @@ class Order extends Model
 
         self::updated(function ($model) {
             $model->logs()->create([
+                'user'   => Auth::user() ?: Auth::guard(config('order.admin_guard'))->user(),
                 'status' => $model->getOriginal('status', '0000') . '|' . $model->status,
                 'state'  => $model->getOriginal('state') . '|' . $model->state,
             ]);

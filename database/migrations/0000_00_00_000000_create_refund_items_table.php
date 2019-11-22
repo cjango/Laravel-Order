@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOrderItemsTable extends Migration
+class CreateRefundItemsTable extends Migration
 {
 
     /**
@@ -14,9 +14,11 @@ class CreateOrderItemsTable extends Migration
      */
     public function up()
     {
-        Schema::create('order_items', function (Blueprint $table) {
+        Schema::create('refund_items', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('order_id')->index('order_id');
+            $table->unsignedBigInteger('refund_id')->index()->comment('所属退款单');
+            $table->unsignedBigInteger('order_id')->comment('所属订单');
+            $table->unsignedBigInteger('order_item_id')->comment('详情ID');
             $table->string('item_type')->comment('商品类型');
             $table->unsignedBigInteger('item_id')->comment('商品编号');
             $table->unsignedInteger('qty')->comment('数量');
@@ -32,7 +34,7 @@ class CreateOrderItemsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('order_items');
+        Schema::dropIfExists('refund_items');
     }
 
 }

@@ -3,7 +3,6 @@
 namespace AsLong\Order;
 
 use AsLong\Address\Contracts\Addressbook;
-use AsLong\Cart\Exceptions\CartException;
 use AsLong\Order\Exceptions\OrderException;
 use AsLong\Order\Models\Order as OrderModel;
 use Exception;
@@ -98,11 +97,11 @@ class Order
     public function create(array $items)
     {
         if (empty($items)) {
-            throw new CartException('无法创建无内容的订单');
+            throw new OrderException('无法创建无内容的订单');
         }
 
         if (!is_numeric($this->user)) {
-            throw new CartException('必须先设置订单用户');
+            throw new OrderException('必须先设置订单用户');
         }
 
         $this->items = new Collection($items);

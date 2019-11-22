@@ -22,11 +22,15 @@ class Refund extends Model
     const REFUND_PROCESS   = 'REFUND_PROCESS';   // 退款中
     const REFUND_COMPLETED = 'REFUND_COMPLETED'; // 退款完成
 
-    protected $table   = 'order_refunds';
-
+    /**
+     * @var array
+     */
     protected $guarded = [];
 
-    protected $dates   = [
+    /**
+     * @var array
+     */
+    protected $dates = [
         'refunded_at',
     ];
 
@@ -35,15 +39,16 @@ class Refund extends Model
         parent::boot();
 
         self::creating(function ($model) {
-            $model->orderid = Helper::orderid(config('aslong_order.refund_orderid.length'), config('aslong_order.refund_orderid.prefix'));
+            $model->state   = self::REFUND_APPLY;
+            $model->orderid = Helper::orderid(config('order.refund_orderid.length'), config('order.refund_orderid.prefix'));
         });
     }
 
     /**
-     * 所属订单
-     * @Author:<C.Jason>
-     * @Date:2018-10-19T13:45:04+0800
-     * @return Order
+     * Notes: 所属订单
+     * @Author: <C.Jason>
+     * @Date: 2019/11/22 4:25 下午
+     * @return BelongsTo
      */
     public function order(): BelongsTo
     {
@@ -51,10 +56,10 @@ class Refund extends Model
     }
 
     /**
-     * 退款单详情
-     * @Author:<C.Jason>
-     * @Date:2018-10-19T13:45:26+0800
-     * @return OrderRefundItem
+     * Notes: 退款单详情
+     * @Author: <C.Jason>
+     * @Date: 2019/11/22 4:25 下午
+     * @return HasMany
      */
     public function items(): HasMany
     {
@@ -62,10 +67,10 @@ class Refund extends Model
     }
 
     /**
-     * 退款单物流
-     * @Author:<C.Jason>
-     * @Date:2018-10-19T10:36:03+0800
-     * @return RefundExpress
+     * Notes: 退款单物流
+     * @Author: <C.Jason>
+     * @Date: 2019/11/22 4:25 下午
+     * @return HasOne
      */
     public function express(): HasOne
     {
@@ -73,9 +78,9 @@ class Refund extends Model
     }
 
     /**
-     * 获取退款状态 $this->state_text
-     * @Author:<C.Jason>
-     * @Date:2018-10-19T10:56:24+0800
+     * Notes: 获取退款状态
+     * @Author: <C.Jason>
+     * @Date: 2019/11/22 4:25 下午
      * @return string
      */
     protected function getStateTextAttribute(): string
