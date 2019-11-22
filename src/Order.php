@@ -137,12 +137,21 @@ class Order
     protected function splitOrderBySeller()
     {
         return $this->items->groupBy('seller_id')->map(function ($items, $key) {
+            /**
+             * 计算分订单总价格
+             */
             $items->amount = $items->reduce(function ($total, $item) {
                 return $total + $item->total();
             });;
+            /**
+             * 计算分订单总数量
+             */
             $items->qty = $items->reduce(function ($qty, $item) {
                 return $qty + $item->qty;
             });;
+            /**
+             * 回传商户ID
+             */
             $items->seller_id = $key;
 
             return $items;
@@ -158,6 +167,9 @@ class Order
      */
     protected function createOne($split, $remark = null)
     {
+        /**
+         * 创建主订单
+         */
         $order = OrderModel::create([
             'seller_id' => $split->seller_id,
             'user_id'   => $this->user,
@@ -166,12 +178,25 @@ class Order
             'remark'    => $this->remark,
         ]);
 
+        /**
+         * 创建订单子条目
+         */
         foreach ($split as $item) {
             $order->items()->create($item->toArray());
         }
 
+        /**
+         * 自动更新地址
+         */
         if ($this->address instanceof Addressbook) {
             $this->setOrderAddress($order, $this->address);
+        }
+
+        /**
+         * 订单自动审核
+         */
+        if (config('order.auto_audit')) {
+            $order->audit();
         }
 
         return $order;
@@ -211,6 +236,13 @@ class Order
         ]);
     }
 
+    /**
+     * Notes: 魔术方法，获取一些参数
+     * @Author: <C.Jason>
+     * @Date: 2019/11/22 2:34 下午
+     * @param $attr
+     * @return int|string|null
+     */
     public function __get($attr)
     {
         switch ($attr) {
@@ -231,6 +263,20 @@ class Order
     public function fromCart($rowIds)
     {
 
+    }
+
+    /**
+     * Notes: 获取订单详情
+     * @Author: <C.Jason>
+     * @Date: 2019/11/22 1:51 下午
+     * @param $orderid
+     */
+    public function get($orderid)
+    {
+        return OrderModel::where('user_id', $this->user)
+                         ->with(['user', 'items', 'express', 'seller', 'logs'])
+                         ->where('orderid', $orderid)
+                         ->first();
     }
 
 }

@@ -25,7 +25,7 @@ trait OrderHasActions
      * @param bool $result
      * @return mixed
      */
-    public function audit(bool $result)
+    public function audit(bool $result = true)
     {
         if (!$this->canAudit()) {
             throw new OrderException("订单状态不可审核");
