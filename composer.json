@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "AsLong\\": "src/"
+            "AsLong\\Order\\": "src/"
         }
     },
     "extra": {
