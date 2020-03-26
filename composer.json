@@ -10,13 +10,13 @@
     ],
     "require": {
         "php": ">=7.1.3",
-        "aslong/address": "^1.0",
+        "aslong/address": "^2.0",
         "aslong/shoppingcart": "^2.0",
         "laravel/framework": "*"
     },
     "autoload": {
-        "psr-0": {
-            "AsLong\\Order": "src/"
+        "psr-4": {
+            "AsLong\\": "src/Order/"
         }
     },
     "extra": {
